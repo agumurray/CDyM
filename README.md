@@ -1,1 +1,1 @@
-# Practicas y notas de la materia circuitos digitales y mictrocontroladores.
+# Practicas y notas de la materia circuitos digitales y microcontroladores.
