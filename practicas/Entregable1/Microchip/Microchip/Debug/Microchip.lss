@@ -3,29 +3,29 @@ Microchip.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000001b4  2**0
+  0 .data         00000000  00800100  00800100  0000019a  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000160  00000000  00000000  00000054  2**1
+  1 .text         00000146  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000001b4  2**0
+  2 .comment      00000030  00000000  00000000  0000019a  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000001e4  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000001cc  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  00000224  2**0
+  4 .debug_aranges 00000020  00000000  00000000  0000020c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000007b6  00000000  00000000  00000244  2**0
+  5 .debug_info   00000755  00000000  00000000  0000022c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 0000068f  00000000  00000000  000009fa  2**0
+  6 .debug_abbrev 00000687  00000000  00000000  00000981  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000340  00000000  00000000  00001089  2**0
+  7 .debug_line   00000342  00000000  00000000  00001008  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  000013cc  2**2
+  8 .debug_frame  00000024  00000000  00000000  0000134c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000003b5  00000000  00000000  000013f0  2**0
+  9 .debug_str    000003bd  00000000  00000000  00001370  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    000001bc  00000000  00000000  000017a5  2**0
+ 10 .debug_loc    0000011a  00000000  00000000  0000172d  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000010  00000000  00000000  00001961  2**0
+ 11 .debug_ranges 00000010  00000000  00000000  00001847  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -66,256 +66,262 @@ Disassembly of section .text:
   70:	de bf       	out	0x3e, r29	; 62
   72:	cd bf       	out	0x3d, r28	; 61
   74:	0e 94 40 00 	call	0x80	; 0x80 <main>
-  78:	0c 94 ae 00 	jmp	0x15c	; 0x15c <_exit>
+  78:	0c 94 a1 00 	jmp	0x142	; 0x142 <_exit>
 
 0000007c <__bad_interrupt>:
   7c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 00000080 <main>:
-    char state = 1;         // Variable para almacenar el estado actual
-    char seq1 = 0b01010101; // Secuencia inicial para el estado 1
-    char seq2 = 0b00000001; // Secuencia inicial para los estados 2 y 3
-    char dir = 0;           // Dirección de desplazamiento para el estado 3 (0: izquierda, 1: derecha)
+	char seq1 = 0b01010101; // Secuencia inicial para el estado 1
+	char seq2 = 0b00000001; // Secuencia inicial para los estados 2 y 3
+	char dir = 0;						// Direccion de desplazamiento para el estado 3 (0: izquierda, 1: derecha)
+	char pressed = 0;				// Variable para detectar si el boton fue presionado
 
-    DDRD = 0xFF;                          // Configuro el Puerto D como salida
+	DDRD = 0xFF;													// Configuro el Puerto D como salida
   80:	8f ef       	ldi	r24, 0xFF	; 255
   82:	8a b9       	out	0x0a, r24	; 10
-    DDRC &= ~(1 << PORTC0 | 1 << PORTC1); // Configuro los pines PC0 y PC1 del Puerto C como entradas
+	DDRC &= ~(1 << PORTC0 | 1 << PORTC1); // Configuro los pines PC0 y PC1 del Puerto C como entradas
   84:	87 b1       	in	r24, 0x07	; 7
   86:	8c 7f       	andi	r24, 0xFC	; 252
   88:	87 b9       	out	0x07, r24	; 7
-    DDRB |= (1 << PORTB3 | 1 << PORTB4);  // Configuro los pines PB3 y PB4 del Puerto B como salidas
+	DDRB |= (1 << PORTB3 | 1 << PORTB4);	// Configuro los pines PB3 y PB4 del Puerto B como salidas
   8a:	84 b1       	in	r24, 0x04	; 4
   8c:	88 61       	ori	r24, 0x18	; 24
   8e:	84 b9       	out	0x04, r24	; 4
-    PORTC |= (1 << PORTC0 | 1 << PORTC1); // Activo resistencias pull-up en los pines PC0 y PC1
+	PORTC |= (1 << PORTC0 | 1 << PORTC1); // Activo resistencias pull-up en los pines PC0 y PC1
   90:	88 b1       	in	r24, 0x08	; 8
   92:	83 60       	ori	r24, 0x03	; 3
   94:	88 b9       	out	0x08, r24	; 8
+	/* Configuracion inicial */
+	char state = 1;					// Variable para almacenar el estado actual
+	char seq1 = 0b01010101; // Secuencia inicial para el estado 1
+	char seq2 = 0b00000001; // Secuencia inicial para los estados 2 y 3
+	char dir = 0;						// Direccion de desplazamiento para el estado 3 (0: izquierda, 1: derecha)
+	char pressed = 0;				// Variable para detectar si el boton fue presionado
+  96:	50 e0       	ldi	r21, 0x00	; 0
 {
-    /* Configuración inicial */
-    char state = 1;         // Variable para almacenar el estado actual
-    char seq1 = 0b01010101; // Secuencia inicial para el estado 1
-    char seq2 = 0b00000001; // Secuencia inicial para los estados 2 y 3
-    char dir = 0;           // Dirección de desplazamiento para el estado 3 (0: izquierda, 1: derecha)
-  96:	60 e0       	ldi	r22, 0x00	; 0
+	/* Configuracion inicial */
+	char state = 1;					// Variable para almacenar el estado actual
+	char seq1 = 0b01010101; // Secuencia inicial para el estado 1
+	char seq2 = 0b00000001; // Secuencia inicial para los estados 2 y 3
+	char dir = 0;						// Direccion de desplazamiento para el estado 3 (0: izquierda, 1: derecha)
+  98:	70 e0       	ldi	r23, 0x00	; 0
 int main(void)
 {
-    /* Configuración inicial */
-    char state = 1;         // Variable para almacenar el estado actual
-    char seq1 = 0b01010101; // Secuencia inicial para el estado 1
-    char seq2 = 0b00000001; // Secuencia inicial para los estados 2 y 3
-  98:	41 e0       	ldi	r20, 0x01	; 1
-/* Función principal */
+	/* Configuracion inicial */
+	char state = 1;					// Variable para almacenar el estado actual
+	char seq1 = 0b01010101; // Secuencia inicial para el estado 1
+	char seq2 = 0b00000001; // Secuencia inicial para los estados 2 y 3
+  9a:	41 e0       	ldi	r20, 0x01	; 1
+/* Funcion principal */
 int main(void)
 {
-    /* Configuración inicial */
-    char state = 1;         // Variable para almacenar el estado actual
-    char seq1 = 0b01010101; // Secuencia inicial para el estado 1
-  9a:	55 e5       	ldi	r21, 0x55	; 85
+	/* Configuracion inicial */
+	char state = 1;					// Variable para almacenar el estado actual
+	char seq1 = 0b01010101; // Secuencia inicial para el estado 1
+  9c:	65 e5       	ldi	r22, 0x55	; 85
 
-/* Función principal */
+/* Funcion principal */
 int main(void)
 {
-    /* Configuración inicial */
-    char state = 1;         // Variable para almacenar el estado actual
-  9c:	91 e0       	ldi	r25, 0x01	; 1
-  9e:	04 c0       	rjmp	.+8      	; 0xa8 <main+0x28>
-            break;
+	/* Configuracion inicial */
+	char state = 1;					// Variable para almacenar el estado actual
+  9e:	91 e0       	ldi	r25, 0x01	; 1
 
-        default:
-            // Estado por defecto: Reinicio al estado 1
-            state = 1;
-            seq1 = 0b01010101;
-  a0:	55 e5       	ldi	r21, 0x55	; 85
-            }
-            break;
+	/* Bucle principal */
+	while (1)
+	{
+		// Apago los LEDs conectados a PB3 y PB4
+		PORTB &= ~(1 << PORTB3 | 1 << PORTB4);
+  a0:	85 b1       	in	r24, 0x05	; 5
+  a2:	87 7e       	andi	r24, 0xE7	; 231
+  a4:	85 b9       	out	0x05, r24	; 5
 
-        default:
-            // Estado por defecto: Reinicio al estado 1
-            state = 1;
-  a2:	91 e0       	ldi	r25, 0x01	; 1
-  a4:	01 c0       	rjmp	.+2      	; 0xa8 <main+0x28>
-            PORTD = seq2;     // Salida de la secuencia actual
-            _delay_ms(100);   // Retardo de 100 ms
-            seq2 = seq2 << 1; // Desplazo el bit encendido hacia la izquierda
-            if (seq2 == 0)    // Si la secuencia se desborda
-            {
-                seq2 = 0b00000001; // Reinicio la secuencia
-  a6:	41 e0       	ldi	r20, 0x01	; 1
-
-    /* Bucle principal */
-    while (1)
-    {
-        // Apago los LEDs conectados a PB3 y PB4
-        PORTB &= ~(1 << PORTB3 | 1 << PORTB4);
-  a8:	85 b1       	in	r24, 0x05	; 5
-  aa:	87 7e       	andi	r24, 0xE7	; 231
-  ac:	85 b9       	out	0x05, r24	; 5
-
-        // Si el botón conectado a PC1 está presionado
-        if (!(PINC & (1 << PINC1)))
-  ae:	31 99       	sbic	0x06, 1	; 6
-  b0:	0b c0       	rjmp	.+22     	; 0xc8 <main+0x48>
-        {
-            // Enciendo los LEDs correspondientes al estado actual en PB3 o PB4
-            PORTB |= (state << 3);
-  b2:	85 b1       	in	r24, 0x05	; 5
-  b4:	29 2f       	mov	r18, r25
-  b6:	30 e0       	ldi	r19, 0x00	; 0
+		// Si el boton conectado a PC1 esta presionado
+		if (!(PINC & (1 << PINC1)))
+  a6:	31 99       	sbic	0x06, 1	; 6
+  a8:	0b c0       	rjmp	.+22     	; 0xc0 <main+0x40>
+		{
+			// Enciendo los LEDs correspondientes al estado actual en PB3 o PB4
+			PORTB |= (state << 3);
+  aa:	85 b1       	in	r24, 0x05	; 5
+  ac:	29 2f       	mov	r18, r25
+  ae:	30 e0       	ldi	r19, 0x00	; 0
+  b0:	22 0f       	add	r18, r18
+  b2:	33 1f       	adc	r19, r19
+  b4:	22 0f       	add	r18, r18
+  b6:	33 1f       	adc	r19, r19
   b8:	22 0f       	add	r18, r18
   ba:	33 1f       	adc	r19, r19
-  bc:	22 0f       	add	r18, r18
-  be:	33 1f       	adc	r19, r19
-  c0:	22 0f       	add	r18, r18
-  c2:	33 1f       	adc	r19, r19
-  c4:	28 2b       	or	r18, r24
-  c6:	25 b9       	out	0x05, r18	; 5
-        }
+  bc:	28 2b       	or	r18, r24
+  be:	25 b9       	out	0x05, r18	; 5
+		}
 
-        // Si el botón conectado a PC0 está presionado
-        if (!(PINC & (1 << PINC0)))
-  c8:	30 99       	sbic	0x06, 0	; 6
-  ca:	0f c0       	rjmp	.+30     	; 0xea <main+0x6a>
-        {
-            // Cambio al siguiente estado (1, 2 o 3)
-            state = (state % 3) + 1;
-  cc:	8b ea       	ldi	r24, 0xAB	; 171
-  ce:	98 9f       	mul	r25, r24
-  d0:	81 2d       	mov	r24, r1
-  d2:	11 24       	eor	r1, r1
-  d4:	86 95       	lsr	r24
-  d6:	28 2f       	mov	r18, r24
-  d8:	22 0f       	add	r18, r18
-  da:	82 0f       	add	r24, r18
-  dc:	98 1b       	sub	r25, r24
-  de:	89 2f       	mov	r24, r25
-  e0:	91 e0       	ldi	r25, 0x01	; 1
-  e2:	98 0f       	add	r25, r24
-            // Reinicio las secuencias y la dirección
-            seq1 = 0b01010101;
-            seq2 = 0b00000001;
-            dir = 0;
-  e4:	60 e0       	ldi	r22, 0x00	; 0
-        {
-            // Cambio al siguiente estado (1, 2 o 3)
-            state = (state % 3) + 1;
-            // Reinicio las secuencias y la dirección
-            seq1 = 0b01010101;
-            seq2 = 0b00000001;
-  e6:	41 e0       	ldi	r20, 0x01	; 1
-        if (!(PINC & (1 << PINC0)))
-        {
-            // Cambio al siguiente estado (1, 2 o 3)
-            state = (state % 3) + 1;
-            // Reinicio las secuencias y la dirección
-            seq1 = 0b01010101;
-  e8:	55 e5       	ldi	r21, 0x55	; 85
-            seq2 = 0b00000001;
-            dir = 0;
-        }
+		// Si el boton conectado a PC0 esta presionado
+		if (!pressed) // Verifico si el boton no estaba previamente presionado
+  c0:	51 11       	cpse	r21, r1
+  c2:	13 c0       	rjmp	.+38     	; 0xea <main+0x6a>
+		{
+			if (!(PINC & (1 << PINC0))) // Si el boton esta presionado
+  c4:	30 99       	sbic	0x06, 0	; 6
+  c6:	13 c0       	rjmp	.+38     	; 0xee <main+0x6e>
+			{
+				// Cambio al siguiente estado (1, 2 o 3)
+				state = (state % 3) + 1;
+  c8:	8b ea       	ldi	r24, 0xAB	; 171
+  ca:	98 9f       	mul	r25, r24
+  cc:	81 2d       	mov	r24, r1
+  ce:	11 24       	eor	r1, r1
+  d0:	86 95       	lsr	r24
+  d2:	28 2f       	mov	r18, r24
+  d4:	22 0f       	add	r18, r18
+  d6:	82 0f       	add	r24, r18
+  d8:	98 1b       	sub	r25, r24
+  da:	89 2f       	mov	r24, r25
+  dc:	91 e0       	ldi	r25, 0x01	; 1
+  de:	98 0f       	add	r25, r24
+				// Reinicio las secuencias y la direccion
+				seq1 = 0b01010101;
+				seq2 = 0b00000001;
+				dir = 0;
+				pressed = 1; // Indico que el boton fue presionado
+  e0:	51 e0       	ldi	r21, 0x01	; 1
+				// Cambio al siguiente estado (1, 2 o 3)
+				state = (state % 3) + 1;
+				// Reinicio las secuencias y la direccion
+				seq1 = 0b01010101;
+				seq2 = 0b00000001;
+				dir = 0;
+  e2:	70 e0       	ldi	r23, 0x00	; 0
+			{
+				// Cambio al siguiente estado (1, 2 o 3)
+				state = (state % 3) + 1;
+				// Reinicio las secuencias y la direccion
+				seq1 = 0b01010101;
+				seq2 = 0b00000001;
+  e4:	41 e0       	ldi	r20, 0x01	; 1
+			if (!(PINC & (1 << PINC0))) // Si el boton esta presionado
+			{
+				// Cambio al siguiente estado (1, 2 o 3)
+				state = (state % 3) + 1;
+				// Reinicio las secuencias y la direccion
+				seq1 = 0b01010101;
+  e6:	65 e5       	ldi	r22, 0x55	; 85
+  e8:	02 c0       	rjmp	.+4      	; 0xee <main+0x6e>
+				pressed = 1; // Indico que el boton fue presionado
+			}
+		}
+		else // Si el boton estaba presionado
+		{
+			if (PINC & (1 << PINC0)) // Si el boton ya no esta presionado
+  ea:	30 99       	sbic	0x06, 0	; 6
+			{
+				pressed = 0; // Indico que el boton fue liberado
+  ec:	50 e0       	ldi	r21, 0x00	; 0
+			}
+		}
 
-        // Comportamiento según el estado actual
-        switch (state)
-  ea:	92 30       	cpi	r25, 0x02	; 2
-  ec:	81 f0       	breq	.+32     	; 0x10e <main+0x8e>
-  ee:	93 30       	cpi	r25, 0x03	; 3
-  f0:	e1 f0       	breq	.+56     	; 0x12a <main+0xaa>
-  f2:	91 30       	cpi	r25, 0x01	; 1
-  f4:	a9 f6       	brne	.-86     	; 0xa0 <main+0x20>
-        {
-        case 1:
-            // Estado 1: Alternancia de LEDs en el Puerto D
-            PORTD = seq1;   // Salida de la secuencia actual
-  f6:	5b b9       	out	0x0b, r21	; 11
+		// Comportamiento segun el estado actual
+		switch (state)
+  ee:	92 30       	cpi	r25, 0x02	; 2
+  f0:	39 f0       	breq	.+14     	; 0x100 <main+0x80>
+  f2:	93 30       	cpi	r25, 0x03	; 3
+  f4:	49 f0       	breq	.+18     	; 0x108 <main+0x88>
+  f6:	91 30       	cpi	r25, 0x01	; 1
+  f8:	b1 f4       	brne	.+44     	; 0x126 <main+0xa6>
+		{
+		case 1:
+			// Estado 1: Alternancia de LEDs en el Puerto D
+			PORTD = seq1; // Salida de la secuencia actual
+  fa:	6b b9       	out	0x0b, r22	; 11
+			seq1 ^= 0xFF; // Invierto los bits de la secuencia
+  fc:	60 95       	com	r22
+			break;
+  fe:	17 c0       	rjmp	.+46     	; 0x12e <main+0xae>
+
+		case 2:
+			// Estado 2: Desplazamiento de un bit encendido hacia la izquierda
+			PORTD = seq2;			// Salida de la secuencia actual
+ 100:	4b b9       	out	0x0b, r20	; 11
+			seq2 = seq2 << 1; // Desplazo el bit encendido hacia la izquierda
+ 102:	44 0f       	add	r20, r20
+			if (seq2 == 0)		// Si la secuencia se desborda
+ 104:	99 f0       	breq	.+38     	; 0x12c <main+0xac>
+ 106:	13 c0       	rjmp	.+38     	; 0x12e <main+0xae>
+			}
+			break;
+
+		case 3:
+			// Estado 3: Desplazamiento de un bit encendido con cambio de direccion
+			PORTD = seq2; // Salida de la secuencia actual
+ 108:	4b b9       	out	0x0b, r20	; 11
+			if (dir)			// Si la direccion es derecha
+ 10a:	77 23       	and	r23, r23
+ 10c:	11 f0       	breq	.+4      	; 0x112 <main+0x92>
+			{
+				seq2 = seq2 >> 1; // Desplazo el bit encendido hacia la derecha
+ 10e:	46 95       	lsr	r20
+ 110:	01 c0       	rjmp	.+2      	; 0x114 <main+0x94>
+			}
+			else // Si la direccion es izquierda
+			{
+				seq2 = seq2 << 1; // Desplazo el bit encendido hacia la izquierda
+ 112:	44 0f       	add	r20, r20
+			}
+			// Cambio de direccion si se alcanza el extremo
+			if ((dir && seq2 == 1 << PORTD0) || (~dir && seq2 == 1 << PORTD7))
+ 114:	77 23       	and	r23, r23
+ 116:	11 f0       	breq	.+4      	; 0x11c <main+0x9c>
+ 118:	41 30       	cpi	r20, 0x01	; 1
+ 11a:	11 f0       	breq	.+4      	; 0x120 <main+0xa0>
+ 11c:	40 38       	cpi	r20, 0x80	; 128
+ 11e:	39 f4       	brne	.+14     	; 0x12e <main+0xae>
+			{
+				dir ^= 1; // Invierto la direccion
+ 120:	81 e0       	ldi	r24, 0x01	; 1
+ 122:	78 27       	eor	r23, r24
+ 124:	04 c0       	rjmp	.+8      	; 0x12e <main+0xae>
+			break;
+
+		default:
+			// Estado por defecto: Reinicio al estado 1
+			state = 1;
+			seq1 = 0b01010101;
+ 126:	65 e5       	ldi	r22, 0x55	; 85
+			}
+			break;
+
+		default:
+			// Estado por defecto: Reinicio al estado 1
+			state = 1;
+ 128:	91 e0       	ldi	r25, 0x01	; 1
+ 12a:	01 c0       	rjmp	.+2      	; 0x12e <main+0xae>
+			// Estado 2: Desplazamiento de un bit encendido hacia la izquierda
+			PORTD = seq2;			// Salida de la secuencia actual
+			seq2 = seq2 << 1; // Desplazo el bit encendido hacia la izquierda
+			if (seq2 == 0)		// Si la secuencia se desborda
+			{
+				seq2 = 0b00000001; // Reinicio la secuencia
+ 12c:	41 e0       	ldi	r20, 0x01	; 1
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  f8:	2f ef       	ldi	r18, 0xFF	; 255
-  fa:	31 ee       	ldi	r19, 0xE1	; 225
-  fc:	84 e0       	ldi	r24, 0x04	; 4
-  fe:	21 50       	subi	r18, 0x01	; 1
- 100:	30 40       	sbci	r19, 0x00	; 0
- 102:	80 40       	sbci	r24, 0x00	; 0
- 104:	e1 f7       	brne	.-8      	; 0xfe <main+0x7e>
- 106:	00 c0       	rjmp	.+0      	; 0x108 <main+0x88>
- 108:	00 00       	nop
-            _delay_ms(100); // Retardo de 100 ms
-            seq1 ^= 0xFF;   // Invierto los bits de la secuencia
- 10a:	50 95       	com	r21
-            break;
- 10c:	cd cf       	rjmp	.-102    	; 0xa8 <main+0x28>
+ 12e:	2f ef       	ldi	r18, 0xFF	; 255
+ 130:	31 ee       	ldi	r19, 0xE1	; 225
+ 132:	84 e0       	ldi	r24, 0x04	; 4
+ 134:	21 50       	subi	r18, 0x01	; 1
+ 136:	30 40       	sbci	r19, 0x00	; 0
+ 138:	80 40       	sbci	r24, 0x00	; 0
+ 13a:	e1 f7       	brne	.-8      	; 0x134 <main+0xb4>
+ 13c:	00 c0       	rjmp	.+0      	; 0x13e <main+0xbe>
+ 13e:	00 00       	nop
+ 140:	af cf       	rjmp	.-162    	; 0xa0 <main+0x20>
 
-        case 2:
-            // Estado 2: Desplazamiento de un bit encendido hacia la izquierda
-            PORTD = seq2;     // Salida de la secuencia actual
- 10e:	4b b9       	out	0x0b, r20	; 11
- 110:	2f ef       	ldi	r18, 0xFF	; 255
- 112:	31 ee       	ldi	r19, 0xE1	; 225
- 114:	84 e0       	ldi	r24, 0x04	; 4
- 116:	21 50       	subi	r18, 0x01	; 1
- 118:	30 40       	sbci	r19, 0x00	; 0
- 11a:	80 40       	sbci	r24, 0x00	; 0
- 11c:	e1 f7       	brne	.-8      	; 0x116 <main+0x96>
- 11e:	00 c0       	rjmp	.+0      	; 0x120 <main+0xa0>
- 120:	00 00       	nop
-            _delay_ms(100);   // Retardo de 100 ms
-            seq2 = seq2 << 1; // Desplazo el bit encendido hacia la izquierda
- 122:	44 0f       	add	r20, r20
-            if (seq2 == 0)    // Si la secuencia se desborda
- 124:	09 f4       	brne	.+2      	; 0x128 <main+0xa8>
- 126:	bf cf       	rjmp	.-130    	; 0xa6 <main+0x26>
- 128:	bf cf       	rjmp	.-130    	; 0xa8 <main+0x28>
-            }
-            break;
+00000142 <_exit>:
+ 142:	f8 94       	cli
 
-        case 3:
-            // Estado 3: Desplazamiento de un bit encendido con cambio de dirección
-            PORTD = seq2;   // Salida de la secuencia actual
- 12a:	4b b9       	out	0x0b, r20	; 11
- 12c:	2f ef       	ldi	r18, 0xFF	; 255
- 12e:	31 ee       	ldi	r19, 0xE1	; 225
- 130:	84 e0       	ldi	r24, 0x04	; 4
- 132:	21 50       	subi	r18, 0x01	; 1
- 134:	30 40       	sbci	r19, 0x00	; 0
- 136:	80 40       	sbci	r24, 0x00	; 0
- 138:	e1 f7       	brne	.-8      	; 0x132 <main+0xb2>
- 13a:	00 c0       	rjmp	.+0      	; 0x13c <main+0xbc>
- 13c:	00 00       	nop
-            _delay_ms(100); // Retardo de 100 ms
-            if (dir)        // Si la dirección es derecha
- 13e:	66 23       	and	r22, r22
- 140:	11 f0       	breq	.+4      	; 0x146 <main+0xc6>
-            {
-                seq2 = seq2 >> 1; // Desplazo el bit encendido hacia la derecha
- 142:	46 95       	lsr	r20
- 144:	01 c0       	rjmp	.+2      	; 0x148 <main+0xc8>
-            }
-            else // Si la dirección es izquierda
-            {
-                seq2 = seq2 << 1; // Desplazo el bit encendido hacia la izquierda
- 146:	44 0f       	add	r20, r20
-            }
-            // Cambio de dirección si se alcanza el extremo
-            if ((dir && seq2 == 1 << PORTD0) || (~dir && seq2 == 1 << PORTD7))
- 148:	66 23       	and	r22, r22
- 14a:	11 f0       	breq	.+4      	; 0x150 <main+0xd0>
- 14c:	41 30       	cpi	r20, 0x01	; 1
- 14e:	19 f0       	breq	.+6      	; 0x156 <main+0xd6>
- 150:	40 38       	cpi	r20, 0x80	; 128
- 152:	09 f0       	breq	.+2      	; 0x156 <main+0xd6>
- 154:	a9 cf       	rjmp	.-174    	; 0xa8 <main+0x28>
-            {
-                dir ^= 1; // Invierto la dirección
- 156:	81 e0       	ldi	r24, 0x01	; 1
- 158:	68 27       	eor	r22, r24
- 15a:	a6 cf       	rjmp	.-180    	; 0xa8 <main+0x28>
-
-0000015c <_exit>:
- 15c:	f8 94       	cli
-
-0000015e <__stop_program>:
- 15e:	ff cf       	rjmp	.-2      	; 0x15e <__stop_program>
+00000144 <__stop_program>:
+ 144:	ff cf       	rjmp	.-2      	; 0x144 <__stop_program>
