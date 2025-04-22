@@ -7,9 +7,9 @@
       "request": "launch",
       "args": [],
       "stopAtEntry": false,
-      "externalConsole": false,
-      "cwd": "/home/agustin-murray/facultad/cdm/practicas/practica-1",
-      "program": "/home/agustin-murray/facultad/cdm/practicas/practica-1/build/Debug/outDebug",
+      "externalConsole": true,
+      "cwd": "c:/Users/agustin-murray/Documents/cdym/practica-2/utils",
+      "program": "c:/Users/agustin-murray/Documents/cdym/practica-2/utils/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
