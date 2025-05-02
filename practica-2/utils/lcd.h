@@ -1,14 +1,9 @@
 #ifndef LCD_H
 #define LCD_H
 
-#include <inttypes.h>
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-#define F_CPU 16000000UL
-#include <util/delay.h>
-
-
-	//#include "main.h"
+#ifndef _MAIN_H
+	#include "main.h"
+#endif
 
 
 //Uncomment this if LCD 4 bit interface is used
@@ -36,7 +31,15 @@
 #define LDDR2 DDRC	//define MCU direction register for port connected to LCD data pins
 #define LCDR DDRD	//define MCU direction register for port connected to LCD control pins
 
-#define LCD_DATAWR(Data)		{PORTB = (PORTB & 0xF9) | ((Data & 0x40) >> 4) | ((Data & 0X80) >> 6); PORTC = (PORTC & 0xF9) | ((Data & 0X10) >> 3) | ((Data & 0X20) >> 3);}
+//--------------------------------------------------------------------------------------------------
+/*Macro para escribir en los puertos conectados al LCD.
+Data es el dato de 8 bits a escribir.
+"PORTX=...((Data & (1<<Y)) >> Z) |..." Escribe el bit Y de Data en el bit Y-Z del puerto X
+*/
+
+#define LCD_DATAWR(Data) PORTB = (PORTB & 0xF9) | ((Data & (1<<6)) >> 4) | ((Data & (1<<7)) >> 6);\
+	                     PORTC = (PORTC & 0xF9) | ((Data & (1<<4)) >> 3) | ((Data & (1<<5)) >> 3);
+//----------------------------------------------------------------------------------------------------
 
 #define LCD_CLR             0	//DB0: clear display
 #define LCD_HOME            1	//DB1: return to home position
@@ -95,7 +98,7 @@ void LCDcursorRight(uint8_t);	//shif cursor right by n
 //adapted from AVRLIB - displays progress only for 8 bit variables
 void LCDprogressBar(uint8_t progress, uint8_t maxprogress, uint8_t length);
 void LCD_Init();
-void LCD_Update(unsigned int temp);
+void LCD_Update();
 
 
 

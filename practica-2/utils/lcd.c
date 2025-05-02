@@ -1,7 +1,5 @@
 #include "lcd.h"
 
-
-
 const uint8_t LcdCustomChar[] PROGMEM=//define 8 custom LCD chars
 {
 	0x00, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x1F, 0x00, // 0. 0/5 full progress block
@@ -14,13 +12,11 @@ const uint8_t LcdCustomChar[] PROGMEM=//define 8 custom LCD chars
 	0x18, 0x1C, 0x1E, 0x1F, 0x1E, 0x1C, 0x18, 0x00  // 7. fast-forward arrow
 };
 
-
 void LCDsendChar(uint8_t ch)		//Sends Char to LCD
 {
 
 #ifdef LCD_4bit
-	//4 bit part
-	//LDP=(ch&0b11110000);
+   //4 bit part
 	LCD_DATAWR(ch&0b11110000);
 	LCP|=1<<LCD_RS;
 	LCP|=1<<LCD_E;		
@@ -28,7 +24,6 @@ void LCDsendChar(uint8_t ch)		//Sends Char to LCD
 	LCP&=~(1<<LCD_E);	
 	LCP&=~(1<<LCD_RS);
 	_delay_us(40);
-	//LDP=((ch&0b00001111)<<4);
 	LCD_DATAWR((ch&0b00001111)<<4);
 	LCP|=1<<LCD_RS;
 	LCP|=1<<LCD_E;		
@@ -51,13 +46,11 @@ void LCDsendCommand(uint8_t cmd)	//Sends Command to LCD
 {
 #ifdef LCD_4bit	
 	//4 bit part
-	//LDP=(cmd&0b11110000);
 	LCD_DATAWR(cmd&0b11110000);
 	LCP|=1<<LCD_E;		
 	_delay_ms(1);
 	LCP&=~(1<<LCD_E);
-	_delay_ms(1);
-	//LDP=((cmd&0b00001111)<<4);	
+	_delay_ms(1);	
 	LCD_DATAWR((cmd&0b00001111)<<4);	
 	LCP|=1<<LCD_E;		
 	_delay_ms(1);
@@ -77,31 +70,26 @@ void LCDinit(void)//Initializes LCD
 #ifdef LCD_4bit	
 	//4 bit part
 	_delay_ms(15);
-	//LDP=0x00;
 	LCD_DATAWR(0x00);	
 	LCP=0x00;
-	DDRC|=0x06;
-	DDRB|=0x06;
 	LDDR1|=1<<LCD_D7|1<<LCD_D6;
 	LDDR2|=1<<LCD_D4|1<<LCD_D5;
-	//LDDR|=1<<LCD_D7|1<<LCD_D6|1<<LCD_D5|1<<LCD_D4;
 	LCDR|=1<<LCD_E|1<<LCD_RW|1<<LCD_RS;
    //---------one------
-	//LDP=0<<LCD_D7|0<<LCD_D6|1<<LCD_D5|1<<LCD_D4; //4 bit mode
 	LCD_DATAWR(0b00110000);	
 	LCP|=1<<LCD_E|0<<LCD_RW|0<<LCD_RS;		
 	_delay_ms(1);
 	LCP&=~(1<<LCD_E);
 	_delay_ms(1);
 	//-----------two-----------
-	//LDP=0<<LCD_D7|0<<LCD_D6|1<<LCD_D5|1<<LCD_D4; //4 bit mode
+	
 	LCD_DATAWR(0b00110000);	
 	LCP|=1<<LCD_E|0<<LCD_RW|0<<LCD_RS;		
 	_delay_ms(1);
 	LCP&=~(1<<LCD_E);
 	_delay_ms(1);
 	//-------three-------------
-	//LDP=0<<LCD_D7|0<<LCD_D6|1<<LCD_D5|0<<LCD_D4; //4 bit mode
+
 	LCD_DATAWR(0b00100000);	
 	LCP|=1<<LCD_E|0<<LCD_RW|0<<LCD_RS;		
 	_delay_ms(1);
@@ -298,7 +286,6 @@ void LCDcursorRight(uint8_t n)	//Moves cursor by n poisitions left
 }
 //adapted fro mAVRLIB
 
-
 //**********   Inicio de Comando Agregado por Fido
 
 void LCDescribeDato(int val,unsigned int field_length)
@@ -335,8 +322,6 @@ void LCDescribeDato(int val,unsigned int field_length)
 }
 
 //**********   Final de Comando Agregado por Fido
-
-
 void LCDprogressBar(uint8_t progress, uint8_t maxprogress, uint8_t length)
 {
 	uint8_t i;
@@ -390,7 +375,8 @@ void LCD_Init() {
 	LCDhome();
 }
 
-void LCD_Update(unsigned int temp){
+/*
+void LCD_Update(){
 	char Temp_string[] = "Temp: 00.0 C"; //Preparo la cadena de string a mostrar en el LCD
 	char CHARMAP[10]={'0','1','2','3','4','5','6','7','8','9'};
 	Temp_string[6] = CHARMAP[temp/100] ; // Obtengo la decena correspondiente al valor de temperatura
@@ -399,3 +385,4 @@ void LCD_Update(unsigned int temp){
 	LCDstring(Temp_string, 12); //Muestro el mensaje en el LCD con la temperatura indicada 
 	LCDhome();
 }
+*/
